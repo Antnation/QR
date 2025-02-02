@@ -1,0 +1,76 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Configure AWS credentials using GitHub Secrets
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Change this to your bucket's region
+
+      # Sync the frontend folder to your S3 bucket
+      - name: Deploy to S3
+        run: |
+          aws s3 sync frontend/ s3://qr-code-gen-ant --delete
+
+name: Build and Deploy Lambda Function
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python 3.8
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      # Step 3: Install dependencies into a build directory
+      - name: Install dependencies
+        run: |
+          mkdir build
+          # Install dependencies from requirements.txt into the build folder
+          pip install -r requirements.txt -t build/
+          # Copy your Lambda function code into the build folder
+          cp lambda_function.py build/
+          # If you have additional files (e.g., configuration files), copy them as needed
+
+      # Step 4: Create the deployment ZIP package
+      - name: Create deployment package
+        run: |
+          cd build
+          zip -r ../lambda_qr_code.zip .
+
+      # Step 5: Deploy to AWS Lambda using the AWS CLI
+      - name: Deploy to AWS Lambda
+        env:
+          AWS_Lambda_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_Lambda_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1  # Update if your Lambda is in another region
+        run: |
+          aws lambda update-function-code --function-name GenerateQRCode --zip-file fileb://lambda_qr_code.zip
+
