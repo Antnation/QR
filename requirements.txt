@@ -1,2 +1,2 @@
-qrcode==8.0
+qrcode==7.4.2
 Pillow==11.1.0
