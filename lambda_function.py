@@ -32,7 +32,7 @@ def lambda_handler(event, context):
         
         # Save the image to a bytes buffer
         buffer = io.BytesIO()
-        img.save(buffer, format="PNG")
+        img.save(buffer, "PNG")
         buffer.seek(0)
         img_bytes = buffer.getvalue()
 
