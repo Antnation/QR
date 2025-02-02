@@ -1,45 +1,87 @@
-<script>
-  document.getElementById('generateBtn').addEventListener('click', function () {
-    const urlInput = document.getElementById('urlInput').value.trim();
-    const qrContainer = document.getElementById('qrContainer');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QR Code Generators</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="mb-4 text-center">QR Code Generators</h1>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <!-- Form for URL input -->
+        <div class="mb-3">
+          <label for="urlInput" class="form-label">Enter URL</label>
+          <input type="text" class="form-control" id="urlInput" placeholder="https://example.com">
+        </div>
+        <button id="generateBtn" class="btn btn-primary w-100">Generate QR Code</button>
+      </div>
+    </div>
+    
+    <!-- Section to display QR Code -->
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-6 text-center">
+        <div id="qrContainer" class="border p-3" style="min-height: 300px;">
+          <p id="loadingMessage" class="text-muted">Your QR Code will appear here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    // Validate URL input
-    if (!urlInput) {
-      alert("Please enter a URL.");
-      return;
-    }
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom JS to call the API endpoint -->
+  <script>
+    document.getElementById('generateBtn').addEventListener('click', function () {
+      const urlInput = document.getElementById('urlInput').value.trim();
+      const qrContainer = document.getElementById('qrContainer');
 
-    // Show loading message
-    qrContainer.innerHTML = '<p id="loadingMessage" class="text-muted">Generating QR Code...</p>';
+      // Validate URL input
+      if (!urlInput) {
+        alert("Please enter a URL.");
+        return;
+      }
 
-    // Replace the local endpoint with your API Gateway endpoint.
-    const baseApiUrl = "https://zzalhml3lf.execute-api.us-east-2.amazonaws.com/Prod/generate?url=";
-    const apiUrl = `${baseApiUrl}${encodeURIComponent(urlInput)}`;
+      // Show loading message
+      qrContainer.innerHTML = '<p id="loadingMessage" class="text-muted">Generating QR Code...</p>';
 
-    fetch(apiUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok.");
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (!data.qr_code) {
-          throw new Error("QR code not returned from the server.");
-        }
-        // Create an image element and set its source to the base64 string
-        const img = document.createElement('img');
-        img.src = `data:image/png;base64,${data.qr_code}`;
-        img.alt = "QR Code";
-        img.className = "img-fluid";
+      // IMPORTANT:
+      // For local testing, you might use a local endpoint.
+      // For production, update baseApiUrl to your API Gateway endpoint.
+      // const baseApiUrl = "http://127.0.0.1:5000/generate?url=";
+      const baseApiUrl = "https://zzalhml3lf.execute-api.us-east-2.amazonaws.com/Prod/generate?url=";
+      
+      const apiUrl = `${baseApiUrl}${encodeURIComponent(urlInput)}`;
 
-        // Clear the container and display the QR code image
-        qrContainer.innerHTML = "";
-        qrContainer.appendChild(img);
-      })
-      .catch(error => {
-        qrContainer.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
-        console.error("Error generating QR code:", error);
-      });
-  });
-</script>
+      fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok.");
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!data.qr_code) {
+            throw new Error("QR code not returned from the server.");
+          }
+          // Create an image element and set its source to the base64 string
+          const img = document.createElement('img');
+          img.src = `data:image/png;base64,${data.qr_code}`;
+          img.alt = "QR Code";
+          img.className = "img-fluid";
+
+          // Clear the container and display the QR code image
+          qrContainer.innerHTML = "";
+          qrContainer.appendChild(img);
+        })
+        .catch(error => {
+          qrContainer.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+          console.error("Error generating QR code:", error);
+        });
+    });
+  </script>
+</body>
+</html>
