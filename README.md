@@ -1,4 +1,4 @@
-# FreeQRGen.com
+# FreeQRgen.com
 
 ## Project Goal
 
