@@ -19,10 +19,6 @@ def lambda_handler(event, context):
     # Read styling parameters, with defaults if not provided
     fill_color = params.get("fill_color", "black")
     back_color = params.get("back_color", "white")
-
-     # Log the received parameters to check that they're coming through as expected
-    logger.info("Received parameters: fill_color: %s, back_color: %s", fill_color, back_color)
-    
     
     try:
         # Generate the QR code
