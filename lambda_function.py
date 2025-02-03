@@ -4,7 +4,7 @@ import io
 import base64
 
 def lambda_handler(event, context):
-    # Get the URL from query parameters (for a GET request)
+    # Get the URL and styling parameters from query parameters (for a GET request)
     params = event.get("queryStringParameters") or {}
     url = params.get("url")
     
@@ -15,6 +15,10 @@ def lambda_handler(event, context):
             "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"},
             "body": json.dumps({"error": "Missing 'url' parameter"})
         }
+    
+    # Read styling parameters, with defaults if not provided
+    fill_color = params.get("fill_color", "black")
+    back_color = params.get("back_color", "white")
     
     try:
         # Generate the QR code
@@ -27,8 +31,8 @@ def lambda_handler(event, context):
         qr.add_data(url)
         qr.make(fit=True)
 
-        # Create an image from the QR Code instance
-        img = qr.make_image(fill_color="black", back_color="white")
+        # Create an image from the QR Code instance using the provided styling options
+        img = qr.make_image(fill_color=fill_color, back_color=back_color)
         
         # Save the image to a bytes buffer
         buffer = io.BytesIO()
